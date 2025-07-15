@@ -1,0 +1,23 @@
+# Общие для всех сервисов
+bin/
+obj/
+*.user
+*.suo
+*.log
+.vs/
+.idea/
+
+# Rider
+.idea/
+
+# NuGet
+*.nupkg
+packages/
+
+# Для C#
+*.dll
+*.exe
+*.pdb
+
+# Конфигурации, локальные файлы
+appsettings.Local.json
