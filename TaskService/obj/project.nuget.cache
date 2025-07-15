@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "08TIPVI50ok=",
+  "success": true,
+  "projectFilePath": "E:\\RiderProjects\\TaskProjectArtsofte\\TaskService\\TaskService.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\dan4i\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.6\\microsoft.aspnetcore.openapi.9.0.6.nupkg.sha512",
+    "C:\\Users\\dan4i\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}

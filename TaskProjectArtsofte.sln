@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskProjectArtsofte", "TaskProjectArtsofte\TaskProjectArtsofte.csproj", "{0112A6B6-4217-4E3B-AFF6-1E6EA6EFECB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService", "TaskService\TaskService.csproj", "{1E28182F-27E1-4B71-8D8D-765DD1C178D0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0112A6B6-4217-4E3B-AFF6-1E6EA6EFECB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0112A6B6-4217-4E3B-AFF6-1E6EA6EFECB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0112A6B6-4217-4E3B-AFF6-1E6EA6EFECB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0112A6B6-4217-4E3B-AFF6-1E6EA6EFECB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E28182F-27E1-4B71-8D8D-765DD1C178D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E28182F-27E1-4B71-8D8D-765DD1C178D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E28182F-27E1-4B71-8D8D-765DD1C178D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E28182F-27E1-4B71-8D8D-765DD1C178D0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
