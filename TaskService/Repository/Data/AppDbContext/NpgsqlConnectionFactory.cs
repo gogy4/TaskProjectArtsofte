@@ -1,17 +1,9 @@
 ﻿using System.Data;
 using Npgsql;
+using TaskService.Repository.Data.AppDbContext;
 
-namespace TaskService.Repository.Data.AppDbContext;
-
-public class NpgsqlConnectionFactory : IDbConnectionFactory
+public class NpgsqlConnectionFactory(string connectionString) : IDbConnectionFactory
 {
-    private readonly string connectionString;
-
-    public NpgsqlConnectionFactory(IConfiguration config)
-    {
-        connectionString = config.GetConnectionString("DefaultConnection");
-    }
-    
     public async Task<IDbConnection> GetConnection()
     {
         var conn = new NpgsqlConnection(connectionString);

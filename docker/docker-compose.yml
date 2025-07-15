@@ -1,0 +1,43 @@
+﻿version: '3.9'
+
+services:
+  postgres-auth:
+    image: postgres:15
+    container_name: postgres-auth
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+      POSTGRES_DB: auth_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+
+  postgres-task:
+    image: postgres:15
+    container_name: postgres-task
+    environment:
+      POSTGRES_USER: task_user
+      POSTGRES_PASSWORD: task_pass
+      POSTGRES_DB: task_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - task_data:/var/lib/postgresql/data
+
+  postgres-notification:
+    image: postgres:15
+    container_name: postgres-notification
+    environment:
+      POSTGRES_USER: notif_user
+      POSTGRES_PASSWORD: notif_pass
+      POSTGRES_DB: notif_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - notif_data:/var/lib/postgresql/data
+
+volumes:
+  auth_data:
+  task_data:
+  notif_data:

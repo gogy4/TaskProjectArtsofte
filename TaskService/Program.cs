@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using TaskService.Application.Services.Abstractions;
 using TaskService.Application.Services.Implementations;
 using TaskService.Repository.Abstractions;
@@ -8,9 +9,11 @@ using TaskService.Repository.Implementations;
 var builder = WebApplication.CreateBuilder(args);
 
 // Services
-builder.Services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddSingleton<IDbConnectionFactory>(new NpgsqlConnectionFactory(connectionString));
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
 // Controllers and Swagger
 builder.Services.AddControllers();
@@ -23,6 +26,11 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 // Middleware
 if (app.Environment.IsDevelopment())

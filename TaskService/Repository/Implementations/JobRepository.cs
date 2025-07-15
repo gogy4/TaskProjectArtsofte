@@ -5,22 +5,30 @@ using TaskService.Repository.Data.AppDbContext;
 
 namespace TaskService.Repository.Implementations;
 
-public class JobRepository(IDbConnectionFactory factory) : IJobRepository
+public class JobRepository : IJobRepository
 {
+    private readonly IDbConnectionFactory _factory;
+
+    public JobRepository(IDbConnectionFactory factory)
+    {
+        _factory = factory;
+    }
+
     public async Task<Job?> GetByIdAsync(int id)
     {
-        const string sql = "select * from Jobs where Id = @Id and IsDeleted = FALSE";
-        using var connection = await factory.GetConnection();
+        const string sql = @"SELECT * FROM ""Jobs"" WHERE ""Id"" = @Id AND ""IsDeleted"" = FALSE";
+        using var connection = await _factory.GetConnection();
         return await connection.QuerySingleOrDefaultAsync<Job>(sql, new { Id = id });
     }
 
     public async Task<IEnumerable<Job>> GetAllAsync(int page, int pageSize, string? filter = null)
     {
-        var sql = "SELECT * FROM Jobs WHERE IsDeleted = FALSE";
+        var sql = @"SELECT * FROM ""Jobs"" WHERE ""IsDeleted"" = FALSE";
         if (!string.IsNullOrEmpty(filter))
-            sql += " AND Title ILIKE @Filter";
+            sql += " AND \"Title\" ILIKE @Filter";
 
-        sql += " ORDER BY CreatedAt DESC OFFSET @Offset LIMIT @Limit";
+        sql += " ORDER BY \"CreatedAt\" DESC OFFSET @Offset LIMIT @Limit";
+
         var parameters = new
         {
             Filter = $"%{filter}%",
@@ -28,58 +36,62 @@ public class JobRepository(IDbConnectionFactory factory) : IJobRepository
             Limit = pageSize
         };
 
-        using var connection = await factory.GetConnection();
+        using var connection = await _factory.GetConnection();
         return await connection.QueryAsync<Job>(sql, parameters);
     }
 
     public async Task<int> AddAsync(Job job)
     {
         const string sql = @"
-        INSERT INTO Jobs (Title, Description, AssignedUserId, Status, CreatedAt, UpdatedAt, IsDeleted)
-        VALUES (@Title, @Description, @AssignedUserId, @Status, @CreatedAt, @UpdatedAt, FALSE)";
+            INSERT INTO ""Jobs"" 
+                (""Title"", ""Description"", ""AssignedUserId"", ""Status"", ""CreatedAt"", ""UpdatedAt"", ""IsDeleted"")
+            VALUES 
+                (@Title, @Description, @AssignedUserId, @Status, @CreatedAt, @UpdatedAt, FALSE)";
 
-        using var connection = await factory.GetConnection();
+        using var connection = await _factory.GetConnection();
         return await connection.ExecuteAsync(sql, job);
     }
-
 
     public async Task<int> UpdateAsync(Job job)
     {
         const string sql = @"
-        UPDATE Jobs SET
-            Title = @Title,
-            Description = @Description,
-            AssignedUserId = @AssignedUserId,
-            Status = @Status,
-            UpdatedAt = @UpdatedAt
-        WHERE Id = @Id";
+            UPDATE ""Jobs"" SET
+                ""Title"" = @Title,
+                ""Description"" = @Description,
+                ""AssignedUserId"" = @AssignedUserId,
+                ""Status"" = @Status,
+                ""UpdatedAt"" = @UpdatedAt
+            WHERE ""Id"" = @Id";
 
-        using var connection = await factory.GetConnection();
+        using var connection = await _factory.GetConnection();
         return await connection.ExecuteAsync(sql, job);
     }
 
     public async Task<int> DeleteAsync(int id)
     {
-        const string sql = "DELETE FROM Jobs WHERE Id = @Id";
+        const string sql = @"DELETE FROM ""Jobs"" WHERE ""Id"" = @Id";
 
-        using var connection = await factory.GetConnection();
+        using var connection = await _factory.GetConnection();
         return await connection.ExecuteAsync(sql, new { Id = id });
     }
 
     public async Task<int> SoftDeleteAsync(int id)
     {
-        const string sql = "UPDATE Jobs SET IsDeleted = TRUE WHERE Id = @Id";
+        const string sql = @"UPDATE ""Jobs"" SET ""IsDeleted"" = TRUE WHERE ""Id"" = @Id";
 
-        using var connection = await factory.GetConnection();
+        using var connection = await _factory.GetConnection();
         return await connection.ExecuteAsync(sql, new { Id = id });
     }
-    
+
     public async Task<int> AssignUserAsync(int jobId, int userId)
     {
         const string sql = @"
-        UPDATE Jobs SET AssignedUserId = @UserId, UpdatedAt = NOW() WHERE Id = @JobId AND IsDeleted = FALSE";
+            UPDATE ""Jobs"" SET 
+                ""AssignedUserId"" = @UserId, 
+                ""UpdatedAt"" = NOW() 
+            WHERE ""Id"" = @JobId AND ""IsDeleted"" = FALSE";
 
-        using var connection = await factory.GetConnection();
+        using var connection = await _factory.GetConnection();
         await connection.ExecuteAsync(sql, new { UserId = userId, JobId = jobId });
         return jobId;
     }

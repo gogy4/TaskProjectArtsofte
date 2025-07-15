@@ -7,8 +7,8 @@ public static class JobMapper
 {
     public static JobDto ToResponse(Job job)
     {
-        var response = new JobDto(job.Id, job.Title, job.Description, job.AssignedUserId, job.Status, job.CreateAt, 
-            job.UpdateAt, job.IsDeleted);
+        var response = new JobDto(job.Id, job.Title, job.Description, job.AssignedUserId, job.Status, job.CreatedAt, 
+            job.UpdatedAt, job.IsDeleted);
         return response;
     }
 
