@@ -1,10 +1,13 @@
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using AuthService.Application.Services.Implementations;
 using AuthService.Repository.Abstractions;
 using AuthService.Repository.AppDbContext;
 using AuthService.Repository.Implementations;
+using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -13,11 +16,13 @@ internal class Program
     private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
+        Env.Load();
+        var key = Environment.GetEnvironmentVariable("JWT_KEY");
         ConfigureServices(builder.Services, builder.Configuration);
         
         var app = builder.Build();
-
+        ApplyMigrations(app);
+        
         ConfigureMiddleware(app);
 
         app.MapControllers();
@@ -29,8 +34,13 @@ internal class Program
     {
         services.AddControllers();
         services.AddEndpointsApiExplorer();
+        
         services.AddSwaggerGen(options =>
         {
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            options.IncludeXmlComments(xmlPath);
+            
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Description = "Bearer",
@@ -54,11 +64,22 @@ internal class Program
                 }
             });
         });
+        
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowApiGateway", policy =>
+            {
+                policy.WithOrigins(Environment.GetEnvironmentVariable("GATEWAY"))
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
 
         services.AddAuthorization();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddSingleton<IDbConnectionFactory>(new NpgsqlConnectionFactory(connectionString));
+        services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
         services.AddSingleton<IBlackListService, BlackListService>();
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         services.AddScoped<IUserRepository, UserRepository>();
@@ -92,11 +113,35 @@ internal class Program
                             Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")!)),
                     RoleClaimType = ClaimTypes.Role
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationhub"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
+    }
+    
+    private static void ApplyMigrations(WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
     }
 
     private static void ConfigureMiddleware(WebApplication app)
     {
+        app.UseCors("AllowApiGateway");
+
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();

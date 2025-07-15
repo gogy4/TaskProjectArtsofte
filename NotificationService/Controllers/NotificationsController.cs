@@ -5,10 +5,18 @@ using NotificationService.Application.Services.Abstractions;
 
 namespace NotificationService.Controllers;
 
+/// <summary>
+/// Управление уведомлениями пользователей.
+/// </summary>
 [ApiController]
 [Route("api/notifications")]
 public class NotificationsController(INotificationService service) : ControllerBase
 {
+    /// <summary>
+    /// Получить уведомления для пользователя по его ID.
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя.</param>
+    /// <returns>Список уведомлений пользователя.</returns>
     [HttpGet("{userId}")]
     public async Task<IActionResult> GetNotifications(int userId)
     {
@@ -23,12 +31,17 @@ public class NotificationsController(INotificationService service) : ControllerB
         }
     }
 
+    /// <summary>
+    /// Отправить новое уведомление.
+    /// </summary>
+    /// <param name="dto">Данные уведомления для создания.</param>
+    /// <returns>Идентификатор созданного уведомления.</returns>
     [HttpPost]
     public async Task<IActionResult> SendNotification(CreateNotificationDto dto)
     {
         try
         {
-            var id =await service.SendNotification(dto);
+            var id = await service.SendNotification(dto);
             return Ok(id);
         }
         catch (Exception ex)
@@ -37,6 +50,11 @@ public class NotificationsController(INotificationService service) : ControllerB
         }
     }
 
+    /// <summary>
+    /// Отметить уведомление как прочитанное по его ID.
+    /// </summary>
+    /// <param name="id">Идентификатор уведомления.</param>
+    /// <returns>Идентификатор обработанного уведомления.</returns>
     [HttpPut("{id}/mark-as-read")]
     public async Task<IActionResult> MarkAsRead(int id)
     {

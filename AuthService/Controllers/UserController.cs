@@ -1,5 +1,6 @@
 ﻿using AuthService.Application.Models;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace AuthService.Controllers;
 
@@ -7,6 +8,11 @@ namespace AuthService.Controllers;
 [Route("api/auth")]
 public class UserController(IUserService service) : ControllerBase
 {
+    /// <summary>
+    /// Регистрация нового пользователя.
+    /// </summary>
+    /// <param name="request">Данные для регистрации (логин и пароль).</param>
+    /// <returns>Id зарегистрированного пользователя.</returns>
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] AuthRequest request)
     {
@@ -21,6 +27,11 @@ public class UserController(IUserService service) : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Вход пользователя в систему.
+    /// </summary>
+    /// <param name="request">Данные для входа (логин и пароль).</param>
+    /// <returns>JWT токен для аутентификации.</returns>
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] AuthRequest request)
     {
@@ -35,7 +46,11 @@ public class UserController(IUserService service) : ControllerBase
         }
     }
 
-    [HttpPost("me")]
+    /// <summary>
+    /// Получение информации о текущем пользователе.
+    /// </summary>
+    /// <returns>Данные текущего пользователя.</returns>
+    [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser()
     {
         try
@@ -49,6 +64,10 @@ public class UserController(IUserService service) : ControllerBase
         }
     }
     
+    /// <summary>
+    /// Выход пользователя из системы.
+    /// </summary>
+    /// <returns>Статус выхода.</returns>
     [HttpPost("logout")]
     public IActionResult Logout()
     {
@@ -63,6 +82,11 @@ public class UserController(IUserService service) : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Получение пользователя по Id.
+    /// </summary>
+    /// <param name="id">Id пользователя.</param>
+    /// <returns>Данные пользователя с указанным Id.</returns>
     [HttpGet("get-user-by/{id}")]
     public async Task<IActionResult> GetUserById(int id)
     {

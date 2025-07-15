@@ -18,17 +18,27 @@ public class NotificationRepository(IDbConnectionFactory factory) : INotificatio
         return await connection.QueryAsync<Notification>(sql, new { UserId = userId });
     }
 
-    public async Task<Notification> AddAsync(Notification notification)
+    public async Task<Notification> GetByIdAsync(int id)
+    {
+        const string sql = @"
+            select * from ""Notifications""
+            where ""Id"" = @Id";
+        
+        using var connection = await factory.GetConnection();
+        return await connection.QuerySingleOrDefaultAsync<Notification>(sql, new { Id = id });
+    }
+
+    public async Task<int> AddAsync(Notification notification)
     {
         const string sql = @"
             INSERT INTO ""Notifications""
-                (""Id"", ""UserId"", ""Message"", ""CreatedAt"", ""IsRead"")
+                (""UserId"", ""Message"", ""CreatedAt"", ""IsRead"")
             VALUES 
-                (@Id, @UserId, @Message, @CreatedAt, @IsRead)
-            RETURNING *;";
+                (@UserId, @Message, @CreatedAt, @IsRead)
+            RETURNING ""Id"";";
 
         using var connection = await factory.GetConnection();
-        return await connection.QuerySingleAsync<Notification>(sql, notification);
+        return await connection.ExecuteScalarAsync<int>(sql, notification);
     }
 
     public async Task MarkAsReadAsync(int id)
@@ -41,4 +51,6 @@ public class NotificationRepository(IDbConnectionFactory factory) : INotificatio
         using var connection = await factory.GetConnection();
         await connection.ExecuteAsync(sql, new { Id = id });
     }
+    
+    
 }

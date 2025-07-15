@@ -1,5 +1,9 @@
 using System.Reflection;
+using System.Text;
+using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using TaskService.Application.Services.Abstractions;
 using TaskService.Application.Services.Implementations;
 using TaskService.Repository.Abstractions;
@@ -11,6 +15,7 @@ internal class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        Env.Load();
 
         ConfigureServices(builder.Services, builder.Configuration);
 
@@ -35,13 +40,96 @@ internal class Program
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
         services.AddControllers();
+
         services.AddEndpointsApiExplorer();
+
         services.AddSwaggerGen(c =>
         {
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             c.IncludeXmlComments(xmlPath);
+
+            c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
+                Name = "Authorization",
+                In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+            {
+                {
+                    new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                    {
+                        Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                        {
+                            Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
         });
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowApiGateway", policy =>
+            {
+                policy.WithOrigins(Environment.GetEnvironmentVariable("GATEWAY"))
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+
+        AddAuthentication(services, configuration);
+    }
+
+    private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
+    {
+        var jwtSettings = configuration.GetSection("JwtSettings");
+        var secretKey = jwtSettings.GetValue<string>("SecretKey");
+
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.GetValue<string>("Issuer"),
+                    ValidAudience = jwtSettings.GetValue<string>("Audience"),
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")!)
+                    ),
+                    RoleClaimType = System.Security.Claims.ClaimTypes.Role
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationhub"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
+            });
     }
 
     private static void ApplyMigrations(WebApplication app)
@@ -53,6 +141,7 @@ internal class Program
 
     private static void ConfigureMiddleware(WebApplication app)
     {
+        app.UseCors("AllowApiGateway");
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -60,7 +149,9 @@ internal class Program
         }
 
         app.UseHttpsRedirection();
+        app.UseAuthentication();
         app.UseAuthorization();
+
         app.MapControllers();
     }
 }
