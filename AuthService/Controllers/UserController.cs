@@ -1,5 +1,4 @@
 ﻿using AuthService.Application.Models;
-using AuthService.Application.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthService.Controllers;

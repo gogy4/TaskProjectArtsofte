@@ -1,5 +1,4 @@
-﻿namespace AuthService.Application.MiddleWare;
-
+﻿
 public class JwtBlacklistMiddleware(RequestDelegate next, IBlackListService blacklistService)
 {
     public async Task InvokeAsync(HttpContext context)

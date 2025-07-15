@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
 
-namespace AuthService.Application.MiddleWare;
-
 public class BlackListService : IBlackListService
 {
     private readonly ConcurrentDictionary<string, DateTime> blacklist = new ();

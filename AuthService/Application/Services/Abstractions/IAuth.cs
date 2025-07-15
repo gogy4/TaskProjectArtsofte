@@ -1,6 +1,5 @@
-﻿namespace AuthService.Application.Services.Abstractions;
-
-public interface IAuthService
+﻿
+public interface IAuth
 {
     int? GetCurrentUserId();
     void Logout(string token);

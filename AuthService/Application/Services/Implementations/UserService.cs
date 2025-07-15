@@ -1,12 +1,11 @@
 ﻿using AuthService.Application.Mapper;
 using AuthService.Application.Models;
-using AuthService.Application.Services.Abstractions;
 using AuthService.Domain.Entity;
 using AuthService.Repository.Abstractions;
 
 namespace AuthService.Application.Services.Implementations;
 
-public class UserService(IUserRepository repository, IEncrypt encrypt, IAuthService authService) : IUserService
+public class UserService(IUserRepository repository, IEncrypt encrypt, IAuth auth) : IUserService
 {
     public async Task<UserModel> GetUserByIdAsync(int id)
     {
@@ -24,15 +23,15 @@ public class UserService(IUserRepository repository, IEncrypt encrypt, IAuthServ
 
     public async Task<string> LoginAsync(AuthRequest request)
     {
-        if (authService.GetCurrentUserId() != -1) return "Вы уже авторизованы";
+        if (auth.GetCurrentUserId() != -1) return "Вы уже авторизованы";
         var userModel = await ValidateCredentials(request.Email, request.Password);
-        var token = authService.GenerateJwtToken(userModel);
+        var token = auth.GenerateJwtToken(userModel);
         return token;
     }
 
     public async Task<UserModel> GetCurrentUser()
     {
-        var id = authService.GetCurrentUserId();
+        var id = auth.GetCurrentUserId();
         if (id is null or -1) throw new ArgumentException("Пользователь не авторизован");
         var user = await repository.GetByIdAsync((int)id);
         return UserMapper.ToModel(user);
@@ -47,7 +46,7 @@ public class UserService(IUserRepository repository, IEncrypt encrypt, IAuthServ
             throw new ArgumentException("Пустой токен");
         }
 
-        authService.Logout(token);
+        auth.Logout(token);
     }
 
     private async Task<UserModel?> ValidateCredentials(string email, string password)

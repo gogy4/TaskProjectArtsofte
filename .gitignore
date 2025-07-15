@@ -18,6 +18,7 @@ packages/
 *.dll
 *.exe
 *.pdb
+*.env
 
 # Конфигурации, локальные файлы
 appsettings.Local.json

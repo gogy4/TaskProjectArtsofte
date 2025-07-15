@@ -1,6 +1,5 @@
 ﻿using AuthService.Application.Models;
 
-namespace AuthService.Application.Services.Abstractions;
 
 public interface IUserService
 {

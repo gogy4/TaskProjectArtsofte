@@ -1,13 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using AuthService.Application.Helpers.Abstractions;
 using AuthService.Application.Models;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AuthService.Application.Helpers;
 
-public class JwtService(IConfiguration configuration) : Abstractions.IJwtService
+public class Jwt(IConfiguration configuration) : IJwt
 {
     public string GenerateJwtToken<T>(T user)
     {

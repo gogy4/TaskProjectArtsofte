@@ -1,14 +1,9 @@
 ﻿using System.Security.Claims;
-using AuthService.Application.Helpers.Abstractions;
-using AuthService.Application.MiddleWare;
-using AuthService.Application.Services.Abstractions;
 
-namespace AuthService.Application.Services.Implementations;
-
-public class AuthService(
+public class Auth(
     IHttpContextAccessor httpContextAccessor,
-    IJwtService jwtService,
-    IBlackListService blackListService) : IAuthService
+    IJwt jwt,
+    IBlackListService blackListService) : IAuth
 {
     public int? GetCurrentUserId()
     {
@@ -33,6 +28,6 @@ public class AuthService(
 
     public string GenerateJwtToken<T>(T user)
     {
-        return jwtService.GenerateJwtToken(user);
+        return jwt.GenerateJwtToken(user);
     }
 }

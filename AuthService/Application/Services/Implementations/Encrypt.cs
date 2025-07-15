@@ -1,7 +1,5 @@
-﻿using AuthService.Application.Services.Abstractions;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
-namespace AuthService.Application.Services.Implementations;
 
 public class Encrypt : IEncrypt
 {
