@@ -5,19 +5,12 @@ using TaskService.Repository.Data.AppDbContext;
 
 namespace TaskService.Repository.Implementations;
 
-public class JobRepository : IJobRepository
+public class JobRepository(IDbConnectionFactory factory) : IJobRepository
 {
-    private readonly IDbConnectionFactory _factory;
-
-    public JobRepository(IDbConnectionFactory factory)
-    {
-        _factory = factory;
-    }
-
     public async Task<Job?> GetByIdAsync(int id)
     {
         const string sql = @"SELECT * FROM ""Jobs"" WHERE ""Id"" = @Id AND ""IsDeleted"" = FALSE";
-        using var connection = await _factory.GetConnection();
+        using var connection = await factory.GetConnection();
         return await connection.QuerySingleOrDefaultAsync<Job>(sql, new { Id = id });
     }
 
@@ -36,7 +29,7 @@ public class JobRepository : IJobRepository
             Limit = pageSize
         };
 
-        using var connection = await _factory.GetConnection();
+        using var connection = await factory.GetConnection();
         return await connection.QueryAsync<Job>(sql, parameters);
     }
 
@@ -46,10 +39,11 @@ public class JobRepository : IJobRepository
             INSERT INTO ""Jobs"" 
                 (""Title"", ""Description"", ""AssignedUserId"", ""Status"", ""CreatedAt"", ""UpdatedAt"", ""IsDeleted"")
             VALUES 
-                (@Title, @Description, @AssignedUserId, @Status, @CreatedAt, @UpdatedAt, FALSE)";
+                (@Title, @Description, @AssignedUserId, @Status, @CreatedAt, @UpdatedAt, FALSE)
+            RETURNING ""Id"";";
 
-        using var connection = await _factory.GetConnection();
-        return await connection.ExecuteAsync(sql, job);
+        using var connection = await factory.GetConnection();
+        return await connection.ExecuteScalarAsync<int>(sql, job);
     }
 
     public async Task<int> UpdateAsync(Job job)
@@ -63,7 +57,7 @@ public class JobRepository : IJobRepository
                 ""UpdatedAt"" = @UpdatedAt
             WHERE ""Id"" = @Id";
 
-        using var connection = await _factory.GetConnection();
+        using var connection = await factory.GetConnection();
         return await connection.ExecuteAsync(sql, job);
     }
 
@@ -71,7 +65,7 @@ public class JobRepository : IJobRepository
     {
         const string sql = @"DELETE FROM ""Jobs"" WHERE ""Id"" = @Id";
 
-        using var connection = await _factory.GetConnection();
+        using var connection = await factory.GetConnection();
         return await connection.ExecuteAsync(sql, new { Id = id });
     }
 
@@ -79,7 +73,7 @@ public class JobRepository : IJobRepository
     {
         const string sql = @"UPDATE ""Jobs"" SET ""IsDeleted"" = TRUE WHERE ""Id"" = @Id";
 
-        using var connection = await _factory.GetConnection();
+        using var connection = await factory.GetConnection();
         return await connection.ExecuteAsync(sql, new { Id = id });
     }
 
@@ -91,8 +85,8 @@ public class JobRepository : IJobRepository
                 ""UpdatedAt"" = NOW() 
             WHERE ""Id"" = @JobId AND ""IsDeleted"" = FALSE";
 
-        using var connection = await _factory.GetConnection();
+        using var connection = await factory.GetConnection();
         await connection.ExecuteAsync(sql, new { UserId = userId, JobId = jobId });
-        return jobId;
+        return jobId; 
     }
 }
