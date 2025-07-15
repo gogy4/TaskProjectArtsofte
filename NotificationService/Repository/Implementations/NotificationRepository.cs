@@ -1,0 +1,44 @@
+using NotificationService.Repository.Abstractions;
+using NotificationService.Repository.Data;
+using Dapper;
+using NotificationService.Domain.Entity;
+
+namespace NotificationService.Repository.Implementations;
+
+public class NotificationRepository(IDbConnectionFactory factory) : INotificationRepository
+{
+    public async Task<IEnumerable<Notification>> GetByUserIdAsync(int userId)
+    {
+        const string sql = @"
+            SELECT * FROM ""Notifications""
+            WHERE ""UserId"" = @UserId
+            ORDER BY ""CreatedAt"" DESC;";
+
+        using var connection = await factory.GetConnection();
+        return await connection.QueryAsync<Notification>(sql, new { UserId = userId });
+    }
+
+    public async Task<Notification> AddAsync(Notification notification)
+    {
+        const string sql = @"
+            INSERT INTO ""Notifications""
+                (""Id"", ""UserId"", ""Message"", ""CreatedAt"", ""IsRead"")
+            VALUES 
+                (@Id, @UserId, @Message, @CreatedAt, @IsRead)
+            RETURNING *;";
+
+        using var connection = await factory.GetConnection();
+        return await connection.QuerySingleAsync<Notification>(sql, notification);
+    }
+
+    public async Task MarkAsReadAsync(int id)
+    {
+        const string sql = @"
+            UPDATE ""Notifications""
+            SET ""IsRead"" = TRUE
+            WHERE ""Id"" = @Id;";
+
+        using var connection = await factory.GetConnection();
+        await connection.ExecuteAsync(sql, new { Id = id });
+    }
+}
