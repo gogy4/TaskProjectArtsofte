@@ -14,9 +14,22 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddControllers();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(options =>
+        ConfigureServices(builder.Services, builder.Configuration);
+        
+        var app = builder.Build();
+
+        ConfigureMiddleware(app);
+
+        app.MapControllers();
+
+        app.Run();
+    }
+
+    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddControllers();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen(options =>
         {
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
@@ -42,35 +55,18 @@ internal class Program
             });
         });
 
-        builder.Services.AddAuthorization();
+        services.AddAuthorization();
 
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        builder.Services.AddSingleton<IDbConnectionFactory>(new NpgsqlConnectionFactory(connectionString));
-        builder.Services.AddSingleton<IBlackListService, BlackListService>();
-        builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-        builder.Services.AddScoped<IUserRepository, UserRepository>();
-        builder.Services.AddScoped<IUserService, UserService>();
-        builder.Services.AddScoped<IEncrypt, Encrypt>();
-        builder.Services.AddScoped<IJwt, Jwt>();
-        builder.Services.AddScoped<IAuth, Auth>();
-        AddAuthentication(builder.Services, builder.Configuration);
-        var app = builder.Build();
-
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
-
-        app.UseHttpsRedirection();
-        app.UseMiddleware<JwtBlacklistMiddleware>();
-
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        app.MapControllers();
-
-        app.Run();
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        services.AddSingleton<IDbConnectionFactory>(new NpgsqlConnectionFactory(connectionString));
+        services.AddSingleton<IBlackListService, BlackListService>();
+        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IEncrypt, Encrypt>();
+        services.AddScoped<IJwt, Jwt>();
+        services.AddScoped<IAuth, Auth>();
+        AddAuthentication(services, configuration);
     }
     
     private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
@@ -98,5 +94,19 @@ internal class Program
                 };
             });
     }
-}
 
+    private static void ConfigureMiddleware(WebApplication app)
+    {
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
+
+        app.UseHttpsRedirection();
+        app.UseMiddleware<JwtBlacklistMiddleware>();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+    }
+}
