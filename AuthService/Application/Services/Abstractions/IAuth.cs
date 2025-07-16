@@ -1,5 +1,4 @@
-﻿
-public interface IAuth
+﻿public interface IAuth
 {
     int? GetCurrentUserId();
     void Logout(string token);

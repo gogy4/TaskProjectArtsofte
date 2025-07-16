@@ -1,7 +1,7 @@
-﻿using AuthService.Application.Models;
-using AuthService.Domain.Entity;
+﻿using Application.Models;
+using Domain.Entity;
 
-namespace AuthService.Application.Mapper;
+namespace Application.Mapper;
 
 public static class UserMapper
 {

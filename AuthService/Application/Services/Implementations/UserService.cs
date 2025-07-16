@@ -1,9 +1,10 @@
-﻿using AuthService.Application.Mapper;
-using AuthService.Application.Models;
-using AuthService.Domain.Entity;
-using AuthService.Repository.Abstractions;
+﻿using Application.Mapper;
+using Application.Models;
+using Domain.Entity;
+using Infrastructure.Repository.Abstractions;
+using Microsoft.AspNetCore.Http;
 
-namespace AuthService.Application.Services.Implementations;
+namespace Application.Services.Implementations;
 
 public class UserService(IUserRepository repository, IEncrypt encrypt, IAuth auth) : IUserService
 {
@@ -12,6 +13,7 @@ public class UserService(IUserRepository repository, IEncrypt encrypt, IAuth aut
         var user = await repository.GetByIdAsync(id);
         return UserMapper.ToModel(user);
     }
+
     public async Task<int> RegisterAsync(AuthRequest request)
     {
         //TODO доделать валидацию
@@ -67,5 +69,4 @@ public class UserService(IUserRepository repository, IEncrypt encrypt, IAuth aut
 
         return UserMapper.ToModel(user);
     }
-    
 }

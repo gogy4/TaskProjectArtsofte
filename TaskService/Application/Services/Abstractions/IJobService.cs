@@ -1,7 +1,6 @@
-﻿using TaskService.Application.Dto;
-using TaskService.Domain;
+﻿using Application.Models;
 
-namespace TaskService.Application.Services.Abstractions;
+namespace Application.Services.Abstractions;
 
 public interface IJobService
 {
@@ -13,5 +12,4 @@ public interface IJobService
     Task<int> DeleteAsync(int id);
     Task<int> AssignUserAsync(int jobId, int userId);
     public Task<IEnumerable<JobHistoryDto>> GetHistoryByJobIdAsync(int jobId, int pageNumber = 1, int pageSize = 10);
-
 }

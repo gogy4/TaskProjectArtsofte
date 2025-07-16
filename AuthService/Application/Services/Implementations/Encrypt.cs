@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
-
 public class Encrypt : IEncrypt
 {
     public string HashPassword(string password, string salt)

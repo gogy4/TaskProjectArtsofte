@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace TaskService.Application.Dto;
+namespace Application.Models;
 
 public class UpdateJobRequest
 {

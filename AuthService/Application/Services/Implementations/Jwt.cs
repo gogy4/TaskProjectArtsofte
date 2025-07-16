@@ -1,9 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using AuthService.Application.Models;
+using Application.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-
 
 public class Jwt(IConfiguration configuration) : IJwt
 {
@@ -23,7 +23,8 @@ public class Jwt(IConfiguration configuration) : IJwt
 
         claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")!));
+        var securityKey =
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")!));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(

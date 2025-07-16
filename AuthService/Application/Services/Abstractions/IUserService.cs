@@ -1,5 +1,5 @@
-﻿using AuthService.Application.Models;
-
+﻿using Application.Models;
+using Microsoft.AspNetCore.Http;
 
 public interface IUserService
 {

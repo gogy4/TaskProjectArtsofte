@@ -1,14 +1,14 @@
+using Application.Hubs;
+using Application.Mappers;
+using Application.Models;
+using Application.Services.Abstractions;
+using Domain.Entity;
 using FluentValidation;
+using Infrastructure.Repository.Abstractions;
 using Microsoft.AspNetCore.SignalR;
-using NotificationService.Application.Mappers;
-using NotificationService.Application.Models;
-using NotificationService.Application.Services.Abstractions;
-using NotificationService.Controllers;
-using NotificationService.Domain.Entity;
-using NotificationService.Hubs;
-using NotificationService.Repository.Abstractions;
+using ValidationException = System.ComponentModel.DataAnnotations.ValidationException;
 
-namespace NotificationService.Application.Services.Implementations;
+namespace Application.Services.Implementations;
 
 public class NotificationService(
     INotificationRepository repository,
@@ -29,6 +29,7 @@ public class NotificationService(
         {
             throw new ValidationException(string.Join(", ", result.Errors.Select(e => e.ErrorMessage)));
         }
+
         var notif = new Notification(dto.UserId, dto.Message, DateTime.UtcNow, false);
         var id = await repository.AddAsync(notif);
         await hub.Clients.User(dto.UserId.ToString())
@@ -46,6 +47,7 @@ public class NotificationService(
         {
             throw new ValidationException(string.Join(", ", result.Errors.Select(e => e.ErrorMessage)));
         }
+
         await repository.MarkAsReadAsync(id);
         return id;
     }

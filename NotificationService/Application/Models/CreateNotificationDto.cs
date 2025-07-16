@@ -1,4 +1,4 @@
-namespace NotificationService.Application.Models;
+namespace Application.Models;
 
 public class CreateNotificationDto
 {

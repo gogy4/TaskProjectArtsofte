@@ -1,6 +1,6 @@
-using TaskService.Application.Dto;
+using Application.Models;
 
-namespace TaskService.Application.Services.Helpers;
+namespace Application.Services.Helpers;
 
 public interface IJobHelper
 {

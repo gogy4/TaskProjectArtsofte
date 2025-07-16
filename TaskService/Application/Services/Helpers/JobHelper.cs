@@ -1,8 +1,8 @@
 using System.Text;
+using Application.Models;
 using Shared.Services;
-using TaskService.Application.Dto;
 
-namespace TaskService.Application.Services.Helpers;
+namespace Application.Services.Helpers;
 
 public class JobHelper : IJobHelper
 {
@@ -16,7 +16,7 @@ public class JobHelper : IJobHelper
 
         return jobDto;
     }
-    
+
     public async Task<JobDto> GetCreatedOrAssignedByUserAsync(JobDto jobDto, HttpClient httpClient)
     {
         var user = await UserHelper.GetCurrentUserId(httpClient);
@@ -27,7 +27,7 @@ public class JobHelper : IJobHelper
 
         return jobDto;
     }
-    
+
     public string GetDifferenceField(JobDto oldJob, JobDto newJob)
     {
         var builder = new StringBuilder();
@@ -45,7 +45,7 @@ public class JobHelper : IJobHelper
                 builder.Append($"{prop.Name} изменилось с '{oldValue}' на '{newValue}'; ");
             }
         }
-        
+
         return builder.ToString();
     }
 }

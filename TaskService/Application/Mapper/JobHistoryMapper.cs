@@ -1,7 +1,7 @@
-using TaskService.Application.Dto;
-using TaskService.Domain;
+using Application.Models;
+using Domain.Entity;
 
-namespace TaskService.Application.Mapper;
+namespace Application.Mapper;
 
 public class JobHistoryMapper
 {

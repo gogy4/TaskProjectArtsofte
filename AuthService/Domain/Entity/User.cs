@@ -1,4 +1,4 @@
-﻿namespace AuthService.Domain.Entity;
+﻿namespace Domain.Entity;
 
 public class User
 {

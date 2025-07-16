@@ -1,4 +1,4 @@
-﻿namespace TaskService.Domain.Enum;
+﻿namespace Domain.Enum;
 
 public enum JobStatus
 {

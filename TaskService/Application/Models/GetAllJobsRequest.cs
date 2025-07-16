@@ -1,4 +1,4 @@
-﻿namespace TaskService.Application.Dto;
+﻿namespace Application.Models;
 
 public class GetAllJobsRequest
 {

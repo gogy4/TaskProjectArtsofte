@@ -1,4 +1,4 @@
-﻿namespace AuthService.Application.Models;
+﻿namespace Application.Models;
 
 public class AuthRequest
 {

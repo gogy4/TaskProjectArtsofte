@@ -1,7 +1,7 @@
-using NotificationService.Application.Models;
-using NotificationService.Domain.Entity;
+using Application.Models;
+using Domain.Entity;
 
-namespace NotificationService.Application.Mappers;
+namespace Application.Mappers;
 
 public static class NotificationMapper
 {

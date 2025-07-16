@@ -1,10 +1,10 @@
-using TaskService.Application.Dto;
-using TaskService.Application.Mapper;
-using TaskService.Application.Services.Abstractions;
-using TaskService.Domain;
-using TaskService.Repository.Abstractions;
+using Application.Mapper;
+using Application.Models;
+using Application.Services.Abstractions;
+using Domain.Entity;
+using Infrastructure.Repository.Abstractions;
 
-namespace TaskService.Application.Services.Implementations;
+namespace Application.Services.Implementations;
 
 public class JobHistoryService(IJobHistoryRepository repository) : IJobHistoryService
 {
@@ -20,8 +20,8 @@ public class JobHistoryService(IJobHistoryRepository repository) : IJobHistorySe
         return jobHistory;
     }
 
-    public Task<IEnumerable<JobHistoryDto>> GetByJobIdAsync(int jobId, int pageNumber, int pageSize)
+    public async Task<IEnumerable<JobHistoryDto>> GetByJobIdAsync(int jobId, int pageNumber, int pageSize)
     {
-        return repository.GetByJobIdAsync(jobId, pageNumber, pageSize);
+        return (await repository.GetByJobIdAsync(jobId, pageNumber, pageSize)).Select(JobHistoryMapper.ToDto);
     }
 }

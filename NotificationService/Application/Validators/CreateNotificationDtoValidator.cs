@@ -1,23 +1,22 @@
-using System.Runtime.InteropServices.ComTypes;
+using Application.Models;
 using FluentValidation;
-using NotificationService.Application.Models;
 using Shared.Services;
 
-namespace NotificationService.Application.Validators;
+namespace Application.Validators;
 
 public class CreateNotificationDtoValidator : AbstractValidator<CreateNotificationDto>
 {
     private readonly HttpClient httpClient;
-    
+
     public CreateNotificationDtoValidator(HttpClient httpClient)
     {
         this.httpClient = httpClient;
-        
+
         RuleFor(x => x.UserId).NotEmpty().WithMessage("UserId is required");
         RuleFor(_ => true)
             .MustAsync(async (_, cancellationToken) => await IsUserLogin())
             .WithMessage("Пользователь не авторизован.");
-        RuleFor(x=>x.UserId)
+        RuleFor(x => x.UserId)
             .MustAsync(async (userId, cancellationToken) => await IsReceiverExists(userId))
             .WithMessage("Пользователя не существует.");
     }

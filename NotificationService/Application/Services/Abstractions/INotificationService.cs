@@ -1,6 +1,6 @@
-using NotificationService.Application.Models;
+using Application.Models;
 
-namespace NotificationService.Application.Services.Abstractions;
+namespace Application.Services.Abstractions;
 
 public interface INotificationService
 {

@@ -1,8 +1,6 @@
 ﻿using System.Text.Json.Serialization;
-using TaskService.Domain;
-using TaskService.Domain.Enum;
 
-namespace TaskService.Application.Dto;
+namespace Application.Models;
 
 public class JobDto
 {

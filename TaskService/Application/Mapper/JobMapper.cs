@@ -1,20 +1,20 @@
-﻿using TaskService.Application.Dto;
-using TaskService.Domain;
+﻿using Application.Models;
+using Domain.Entity;
 
-namespace TaskService.Application.Mapper;
+namespace Application.Mapper;
 
 public static class JobMapper
 {
     public static JobDto ToDto(Job job)
     {
-        var response = new JobDto(job.Id, job.Title, job.Description, job.Status, job.CreatedAt, 
+        var response = new JobDto(job.Id, job.Title, job.Description, job.Status, job.CreatedAt,
             job.UpdatedAt, job.IsDeleted, job.CreatedUserId, job.AssignedUserId);
         return response;
     }
 
     public static Job ToJob(JobDto dto)
     {
-        var entity = new Job( dto.Id, dto.Title, dto.Description, dto.Status,
+        var entity = new Job(dto.Id, dto.Title, dto.Description, dto.Status,
             dto.CreateAt, dto.UpdateAt, dto.IsDeleted, dto.CreatedUserId, dto.AssignedUserId);
         return entity;
     }
