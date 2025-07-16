@@ -88,7 +88,7 @@ internal class Program
         });
 
         services.AddAuthorization();
-
+        services.AddSingleton<IBlackListService, BlackListService>();
         services.AddSignalR();
         services.AddHttpContextAccessor();
         services.AddTransient<ForwardAccessTokenHandler>();
@@ -176,6 +176,7 @@ internal class Program
 
     private static void ConfigureMiddleware(WebApplication app)
     {
+        app.UseMiddleware<JwtBlacklistMiddleware>();
         app.UseCors("AllowApiGateway");
 
         if (app.Environment.IsDevelopment())

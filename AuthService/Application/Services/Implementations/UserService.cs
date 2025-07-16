@@ -1,12 +1,14 @@
 ﻿using Application.Mapper;
 using Application.Models;
 using Domain.Entity;
+using FluentValidation;
 using Infrastructure.Repository.Abstractions;
 using Microsoft.AspNetCore.Http;
 
 namespace Application.Services.Implementations;
 
-public class UserService(IUserRepository repository, IEncrypt encrypt, IAuth auth) : IUserService
+public class UserService(IUserRepository repository, IEncrypt encrypt, IAuth auth, IValidator<AuthRequest> validator)
+    : IUserService
 {
     public async Task<UserModel> GetUserByIdAsync(int id)
     {
@@ -16,7 +18,12 @@ public class UserService(IUserRepository repository, IEncrypt encrypt, IAuth aut
 
     public async Task<int> RegisterAsync(AuthRequest request)
     {
-        //TODO доделать валидацию
+        var result = await validator.ValidateAsync(request);
+        if (!result.IsValid)
+        {
+            throw new ValidationException(string.Join(", ", result.Errors.Select(e => e.ErrorMessage)));
+        }
+
         var salt = Guid.NewGuid().ToString();
         var user = new User(request.Email, encrypt.HashPassword(request.Password, salt), salt);
         var id = await repository.CreateAsync(user);

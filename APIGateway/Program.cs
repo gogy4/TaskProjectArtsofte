@@ -30,12 +30,15 @@ internal class Program
     {
         services.AddEndpointsApiExplorer();
 
+        services.AddControllers(); 
+        services.AddSingleton<IBlackListService, BlackListService>();
+
         services.AddSwaggerGen(options =>
         {
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             options.IncludeXmlComments(xmlPath);
-            
+
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -59,8 +62,6 @@ internal class Program
                     Array.Empty<string>()
                 }
             });
-            
-            
 
             options.AddServer(new OpenApiServer
             {
@@ -78,14 +79,14 @@ internal class Program
                 Description = "Notification Service"
             });
         });
-        
+
         services.AddCors(options =>
         {
             options.AddPolicy("AllowAll", policy =>
             {
                 policy.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
             });
         });
 
@@ -135,6 +136,7 @@ internal class Program
 
     private static void ConfigureMiddleware(WebApplication app)
     {
+        app.UseMiddleware<JwtBlacklistMiddleware>();
         app.UseCors("AllowAll");
 
         if (app.Environment.IsDevelopment())
@@ -153,8 +155,6 @@ internal class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
-
-        app.MapGet("/", () => Results.Redirect("https://localhost:7024/swagger/index.html"));
 
         app.Use(async (context, next) =>
         {

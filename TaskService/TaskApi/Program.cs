@@ -27,9 +27,7 @@ internal class Program
         ApplyMigrations(app);
 
         ConfigureMiddleware(app);
-
-        app.MapGet("/", () => "TaskService API is running");
-
+        
         app.Run();
     }
 
@@ -37,6 +35,7 @@ internal class Program
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddHttpContextAccessor();
+        services.AddSingleton<IBlackListService, BlackListService>();
         services.AddTransient<ForwardAccessTokenHandler>();
         services.AddSingleton<IDbConnectionFactory>(new NpgsqlConnectionFactory(connectionString));
         services.AddHttpClient<IJobService, JobService>(client =>
@@ -53,6 +52,7 @@ internal class Program
         services.AddScoped<IJobHistoryService, JobHistoryService>();
         services.AddScoped<IJobHistoryRepository, JobHistoryRepository>();
         services.AddScoped<IJobHelper, JobHelper>();
+
         services.AddControllers();
 
         services.AddEndpointsApiExplorer();
@@ -155,6 +155,8 @@ internal class Program
 
     private static void ConfigureMiddleware(WebApplication app)
     {
+        app.UseMiddleware<JwtBlacklistMiddleware>();
+
         app.UseCors("AllowApiGateway");
         if (app.Environment.IsDevelopment())
         {

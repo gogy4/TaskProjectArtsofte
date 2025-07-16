@@ -1,8 +1,11 @@
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using Application.Models;
 using Application.Services.Implementations;
+using Application.Validators;
 using DotNetEnv;
+using FluentValidation;
 using Infrastructure.Data;
 using Infrastructure.Repository.Abstractions;
 using Infrastructure.Repository.Implementations;
@@ -88,6 +91,7 @@ internal class Program
         services.AddScoped<IEncrypt, Encrypt>();
         services.AddScoped<IJwt, Jwt>();
         services.AddScoped<IAuth, Auth>();
+        services.AddScoped<IValidator<AuthRequest>, AuthRegisterValidator>();
         AddAuthentication(services, configuration);
     }
 
