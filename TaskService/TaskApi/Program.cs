@@ -1,7 +1,9 @@
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using Application.Services.Abstractions;
 using Application.Services.Helpers;
+using Application.Services.Helpers.Implementations;
 using Application.Services.Implementations;
 using DotNetEnv;
 using Infrastructure.Data;
@@ -47,14 +49,30 @@ internal class Program
                         HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
                 })
             .AddHttpMessageHandler<ForwardAccessTokenHandler>();
+        
+        services.AddHttpClient<INotificationSender, NotificationSender>(client =>
+            {
+                client.BaseAddress = new Uri($"{Environment.GetEnvironmentVariable("NOTIFICATION_API")}/api/notifications/");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() =>
+                new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = 
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                })
+            .AddHttpMessageHandler<ForwardAccessTokenHandler>();
+
+
         services.AddScoped<IJobRepository, JobRepository>();
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<IJobHistoryService, JobHistoryService>();
         services.AddScoped<IJobHistoryRepository, JobHistoryRepository>();
         services.AddScoped<IJobHelper, JobHelper>();
 
-        services.AddControllers();
-
+        services.AddControllers().AddJsonOptions(opts =>
+        {
+            opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
         services.AddEndpointsApiExplorer();
 
         services.AddSwaggerGen(c =>

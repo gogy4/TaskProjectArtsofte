@@ -2,7 +2,7 @@ using System.Text;
 using Application.Models;
 using Shared.Services;
 
-namespace Application.Services.Helpers;
+namespace Application.Services.Helpers.Implementations;
 
 public class JobHelper : IJobHelper
 {

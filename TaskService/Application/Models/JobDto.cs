@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Domain.Enum;
 
 namespace Application.Models;
 
@@ -9,7 +10,9 @@ public class JobDto
     public string Title { get; set; }
     public string Description { get; set; }
     public int? AssignedUserId { get; set; } = null;
-    public int Status { get; set; }
+    
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public JobStatus Status { get; set; }
     
     [JsonIgnore]
     public DateTime CreateAt { get; set; }
@@ -22,7 +25,7 @@ public class JobDto
     [JsonIgnore]
     public int CreatedUserId { get; set; }
 
-    public JobDto(int id, string title, string description, int status, DateTime createAt,
+    public JobDto(int id, string title, string description, JobStatus status, DateTime createAt,
         DateTime updateAt, bool isDeleted, int createdUserId, int? assignedUserId = null)
     {
         Id = id;
@@ -47,5 +50,10 @@ public class JobDto
         UpdateAt = job.UpdateAt;
         IsDeleted = job.IsDeleted;
         CreatedUserId = job.CreatedUserId;
+    }
+
+    public JobDto()
+    {
+        
     }
 }

@@ -11,7 +11,8 @@ public class JobService(
     IJobRepository repository,
     HttpClient httpClient,
     IJobHistoryService service,
-    IJobHelper jobHelper) : IJobService
+    IJobHelper jobHelper,
+    INotificationSender notificationSender) : IJobService
 {
     public async Task<IEnumerable<JobDto>> GetAllAsync(GetAllJobsRequest request)
     {
@@ -38,6 +39,7 @@ public class JobService(
         var id = await repository.CreateAsync(job);
         var jobHistoryDto = new JobHistoryDto(id, "Создание таски", DateTime.UtcNow, user.Id);
         await service.CreateAsync(jobHistoryDto);
+        await notificationSender.SendNotificationAsync(user.Id, $"Вы создали новую задачу: {job.Title}");
         return id;
     }
 
@@ -49,6 +51,13 @@ public class JobService(
         var action = jobHelper.GetDifferenceField(jobDto, editedJob);
         var jobHistoryDto = new JobHistoryDto(jobId, action, DateTime.UtcNow, jobDto.CreatedUserId);
         await service.CreateAsync(jobHistoryDto);
+        await notificationSender.SendNotificationAsync(jobDto.CreatedUserId, $"Задача обновлена: {jobDto.Title}");
+        if (jobDto.AssignedUserId is not null)
+        {
+            await notificationSender.SendNotificationAsync(jobDto.AssignedUserId.Value,
+                $"Задача, назначенная вам, обновлена: {jobDto.Title}");
+        }
+
         return jobId;
     }
 
@@ -59,6 +68,13 @@ public class JobService(
         var resultId = await repository.SoftDeleteAsync(id);
         var jobHistoryDto = new JobHistoryDto(resultId, "Мягкое удаление", DateTime.UtcNow, jobDto.CreatedUserId);
         await service.CreateAsync(jobHistoryDto);
+        await notificationSender.SendNotificationAsync(jobDto.CreatedUserId, $"Задача мягко удалена: {jobDto.Title}");
+        if (jobDto.AssignedUserId.HasValue)
+        {
+            await notificationSender.SendNotificationAsync(jobDto.AssignedUserId.Value,
+                $"Задача, назначенная вам, мягко удалена: {jobDto.Title}");
+        }
+
         return resultId;
     }
 
@@ -68,6 +84,13 @@ public class JobService(
         var resultId = await repository.DeleteAsync(id);
         var jobHistoryDto = new JobHistoryDto(resultId, "Полное удаление", DateTime.UtcNow, jobDto.CreatedUserId);
         await service.CreateAsync(jobHistoryDto);
+        await notificationSender.SendNotificationAsync(jobDto.CreatedUserId, $"Задача удалена: {jobDto.Title}");
+        if (jobDto.AssignedUserId.HasValue)
+        {
+            await notificationSender.SendNotificationAsync(jobDto.AssignedUserId.Value,
+                $"Задача, назначенная вам, удалена: {jobDto.Title}");
+        }
+
         return resultId;
     }
 
@@ -80,6 +103,10 @@ public class JobService(
         var jobHistoryDto = new JobHistoryDto(resultId, $"Назначили исполнителя с id : {userId}", DateTime.UtcNow,
             jobDto.CreatedUserId);
         await service.CreateAsync(jobHistoryDto);
+        await notificationSender.SendNotificationAsync(userId, $"Вам назначена задача: {jobDto.Title}");
+        await notificationSender.SendNotificationAsync(jobDto.CreatedUserId,
+            $"Вы назначили задачу: {jobDto.Title} пользователю с ID {userId}");
+
         return resultId;
     }
 

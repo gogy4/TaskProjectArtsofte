@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Domain.Enum;
 
 namespace Application.Models;
 
@@ -9,13 +10,14 @@ public class UpdateJobRequest
     public string Title { get; set; }
     public string Description { get; set; }
     public int? AssignedUserId { get; set; }
-    public int Status { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public JobStatus Status { get; set; }
     
     [JsonIgnore]
     public DateTime UpdateAt { get; set; }
     public bool IsDeleted { get; set; }
 
-    public UpdateJobRequest(int id, string title, string description, int status,
+    public UpdateJobRequest(int id, string title, string description, JobStatus status,
         DateTime updateAt, bool isDeleted, int? assignedUserId = null)
     {
         Id = id;

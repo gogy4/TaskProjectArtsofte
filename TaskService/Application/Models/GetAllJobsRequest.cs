@@ -12,4 +12,9 @@ public class GetAllJobsRequest
         PageSize = pageSize;
         Filter = filter;
     }
+
+    public GetAllJobsRequest()
+    {
+        
+    }
 }

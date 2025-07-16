@@ -34,7 +34,7 @@ public class JobController(IJobService service) : ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Get(int id)
+    public async Task<IActionResult> Get([FromRoute] int id)
     {
         try
         {
@@ -72,7 +72,7 @@ public class JobController(IJobService service) : ControllerBase
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateJobRequest job)
+    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateJobRequest job)
     {
         try
         {
@@ -92,7 +92,7 @@ public class JobController(IJobService service) : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> HardDelete(int id)
+    public async Task<IActionResult> HardDelete([FromRoute] int id)
     {
         try
         {
@@ -131,7 +131,7 @@ public class JobController(IJobService service) : ControllerBase
     [HttpPut("{id}/assign")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> AssignUser(int id, [FromBody] int userId)
+    public async Task<IActionResult> AssignUser([FromRoute] int id, [FromBody] int userId)
     {
         try
         {
@@ -152,11 +152,11 @@ public class JobController(IJobService service) : ControllerBase
     [HttpGet("get-history-by-job/{jobId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetHistoryByJobId(int jobId)
+    public async Task<IActionResult> GetHistoryByJobId([FromRoute] int jobId, [FromQuery] GetAllHistoryRequest request)
     {
         try
         {
-            var history = await service.GetHistoryByJobIdAsync(jobId);
+            var history = await service.GetHistoryByJobIdAsync(jobId, request.PageNumber, request.PageSize);
             return Ok(history);
         }
         catch (Exception ex)
