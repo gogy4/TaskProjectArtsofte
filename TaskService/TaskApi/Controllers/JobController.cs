@@ -10,8 +10,14 @@ namespace TaskApi.Controllers;
 public class JobController(IJobService service) : ControllerBase
 {
     /// <summary>
-    /// Получить список задач с фильтрацией и пагинацией.
+    /// Получить список задач по текущему пользователю с фильтрацией и пагинацией.
     /// </summary>
+    /// <remarks>
+    /// Поддерживается фильтрация по заголовку задачи (filter — поиск по title).
+    /// Для пагинации используются параметры:
+    /// - pageSize — количество задач, отображаемых на странице,
+    /// - pageNumber — номер страницы для отображения.
+    /// </remarks>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -50,6 +56,10 @@ public class JobController(IJobService service) : ControllerBase
     /// <summary>
     /// Создать новую задачу.
     /// </summary>
+    /// <remarks>
+    /// При создании задачи отправляется уведомление пользователю, указанному как создатель задачи, 
+    /// а также назначенному исполнителю (если он указан).
+    /// </remarks>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -69,6 +79,11 @@ public class JobController(IJobService service) : ControllerBase
     /// <summary>
     /// Обновить задачу по ID.
     /// </summary>
+    /// <remarks>
+    /// При обновлении задачи отправляется уведомление пользователю, указанному как создатель задачи, 
+    /// а также текущему исполнителю (если он назначен). 
+    /// Это информирует их об изменениях в задаче.
+    /// </remarks>
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -88,6 +103,10 @@ public class JobController(IJobService service) : ControllerBase
     /// <summary>
     /// Жесткое удаление задачи по ID.
     /// </summary>
+    /// <remarks>
+    /// При жестком удалении задачи отправляется уведомление пользователю, указанному как создатель задачи, 
+    /// а также исполнителю (если назначен), с информацией об удалении задачи.
+    /// </remarks>
     [HttpDelete("{id}/hard-delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -108,6 +127,10 @@ public class JobController(IJobService service) : ControllerBase
     /// <summary>
     /// Мягкое удаление задачи по ID (IsDeleted).
     /// </summary>
+    /// <remarks>
+    /// При мягком удалении задачи (логическом удалении) отправляется уведомление пользователю, указанному как создатель задачи,
+    /// а также исполнителю (если назначен), чтобы информировать об изменении статуса задачи.
+    /// </remarks>
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -145,10 +168,14 @@ public class JobController(IJobService service) : ControllerBase
     }
 
     /// <summary>
-    /// Получить всю историю изменений для job по jobId
+    /// Получить всю историю изменений для задачи по jobId.
     /// </summary>
-    /// <param name="jobId"></param>
-    /// <returns></returns>
+    /// <remarks>
+    /// Поддерживается пагинация с параметрами:
+    /// - pageSize — количество записей истории на странице,
+    /// - pageNumber — номер страницы.
+    /// </remarks>
+    /// <param name="jobId">ID задачи, для которой запрашивается история изменений.</param>
     [HttpGet("get-history-by-job/{jobId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -9,6 +9,7 @@ obj/
 
 # Rider
 .idea/
+.Migrations/
 
 # NuGet
 *.nupkg
