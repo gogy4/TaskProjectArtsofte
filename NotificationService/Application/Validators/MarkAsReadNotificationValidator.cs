@@ -1,5 +1,6 @@
 using FluentValidation;
 using NotificationService.Application.Models;
+using Shared.Services;
 
 namespace NotificationService.Controllers;
 
@@ -18,10 +19,7 @@ public class MarkAsReadNotificationValidator : AbstractValidator<NotificationDto
     
     private async Task<bool> IsUserLogin(int userId)
     {
-        var response = await httpClient.GetAsync("me");
-        if (!response.IsSuccessStatusCode) return false;
-
-        var user = await response.Content.ReadFromJsonAsync<UserIdDto>();
+        var user = await UserHelper.GetCurrentUserId(httpClient);
         return user != null && user.Id == userId;
     }
 }

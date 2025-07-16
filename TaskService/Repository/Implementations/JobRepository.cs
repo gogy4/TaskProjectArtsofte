@@ -9,14 +9,19 @@ public class JobRepository(IDbConnectionFactory factory) : IJobRepository
 {
     public async Task<Job?> GetByIdAsync(int id)
     {
-        const string sql = @"SELECT * FROM ""Jobs"" WHERE ""Id"" = @Id AND ""IsDeleted"" = FALSE";
+        const string sql = @"SELECT * FROM ""Jobs"" WHERE ""Id"" = @Id";
         using var connection = await factory.GetConnection();
         return await connection.QuerySingleOrDefaultAsync<Job>(sql, new { Id = id });
     }
 
-    public async Task<IEnumerable<Job>> GetAllAsync(int page, int pageSize, string? filter = null)
+    public async Task<IEnumerable<Job>> GetAllAsync(int userId, int page, int pageSize, string? filter = null)
     {
-        var sql = @"SELECT * FROM ""Jobs"" WHERE ""IsDeleted"" = FALSE";
+        var sql = @"
+        SELECT * FROM ""Jobs""
+        WHERE ""IsDeleted"" = FALSE
+          AND (""CreatedUserId"" = @UserId OR ""AssignedUserId"" = @UserId)
+    ";
+
         if (!string.IsNullOrEmpty(filter))
             sql += " AND \"Title\" ILIKE @Filter";
 
@@ -24,6 +29,7 @@ public class JobRepository(IDbConnectionFactory factory) : IJobRepository
 
         var parameters = new
         {
+            UserId = userId,
             Filter = $"%{filter}%",
             Offset = (page - 1) * pageSize,
             Limit = pageSize
@@ -33,13 +39,14 @@ public class JobRepository(IDbConnectionFactory factory) : IJobRepository
         return await connection.QueryAsync<Job>(sql, parameters);
     }
 
-    public async Task<int> AddAsync(Job job)
+
+    public async Task<int> CreateAsync(Job job)
     {
         const string sql = @"
             INSERT INTO ""Jobs"" 
-                (""Title"", ""Description"", ""AssignedUserId"", ""Status"", ""CreatedAt"", ""UpdatedAt"", ""IsDeleted"")
+                (""Title"", ""Description"", ""AssignedUserId"", ""Status"", ""CreatedAt"", ""UpdatedAt"", ""IsDeleted"", ""CreatedUserId"")
             VALUES 
-                (@Title, @Description, @AssignedUserId, @Status, @CreatedAt, @UpdatedAt, FALSE)
+                (@Title, @Description, @AssignedUserId, @Status, @CreatedAt, @UpdatedAt, @IsDeleted, @CreatedUserId)
             RETURNING ""Id"";";
 
         using var connection = await factory.GetConnection();
@@ -54,8 +61,9 @@ public class JobRepository(IDbConnectionFactory factory) : IJobRepository
                 ""Description"" = @Description,
                 ""AssignedUserId"" = @AssignedUserId,
                 ""Status"" = @Status,
-                ""UpdatedAt"" = @UpdatedAt
-            WHERE ""Id"" = @Id";
+                ""UpdatedAt"" = @UpdatedAt,
+                ""IsDeleted"" = @IsDeleted
+                WHERE ""Id"" = @Id";
 
         using var connection = await factory.GetConnection();
         return await connection.ExecuteAsync(sql, job);
@@ -63,18 +71,25 @@ public class JobRepository(IDbConnectionFactory factory) : IJobRepository
 
     public async Task<int> DeleteAsync(int id)
     {
-        const string sql = @"DELETE FROM ""Jobs"" WHERE ""Id"" = @Id";
+        const string sql = @"
+        DELETE FROM ""Jobs""
+        WHERE ""Id"" = @Id
+        RETURNING ""Id"";";
 
         using var connection = await factory.GetConnection();
-        return await connection.ExecuteAsync(sql, new { Id = id });
+        return await connection.QuerySingleOrDefaultAsync<int>(sql, new { Id = id });
     }
 
     public async Task<int> SoftDeleteAsync(int id)
     {
-        const string sql = @"UPDATE ""Jobs"" SET ""IsDeleted"" = TRUE WHERE ""Id"" = @Id";
+        const string sql = @"
+        UPDATE ""Jobs""
+        SET ""IsDeleted"" = TRUE
+        WHERE ""Id"" = @Id
+        RETURNING ""Id"";";
 
         using var connection = await factory.GetConnection();
-        return await connection.ExecuteAsync(sql, new { Id = id });
+        return await connection.QuerySingleOrDefaultAsync<int>(sql, new { Id = id });
     }
 
     public async Task<int> AssignUserAsync(int jobId, int userId)
@@ -87,6 +102,6 @@ public class JobRepository(IDbConnectionFactory factory) : IJobRepository
 
         using var connection = await factory.GetConnection();
         await connection.ExecuteAsync(sql, new { UserId = userId, JobId = jobId });
-        return jobId; 
+        return jobId;
     }
 }

@@ -12,6 +12,7 @@ namespace TaskService.Repository.Data.AppDbContext
         }
 
         public DbSet<Job> Jobs { get; set; }
+        public DbSet<JobHistory> JobHistory { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

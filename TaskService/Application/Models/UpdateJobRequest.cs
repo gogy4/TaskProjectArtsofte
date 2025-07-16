@@ -1,0 +1,29 @@
+using System.Text.Json.Serialization;
+
+namespace TaskService.Application.Dto;
+
+public class UpdateJobRequest
+{
+    [JsonIgnore]
+    public int Id { get; set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public int? AssignedUserId { get; set; }
+    public int Status { get; set; }
+    
+    [JsonIgnore]
+    public DateTime UpdateAt { get; set; }
+    public bool IsDeleted { get; set; }
+
+    public UpdateJobRequest(int id, string title, string description, int status,
+        DateTime updateAt, bool isDeleted, int? assignedUserId = null)
+    {
+        Id = id;
+        Title = title;
+        Description = description;
+        AssignedUserId = assignedUserId;
+        Status = status;
+        UpdateAt = updateAt;
+        IsDeleted = isDeleted;
+    }
+}

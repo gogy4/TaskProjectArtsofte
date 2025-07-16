@@ -12,6 +12,7 @@
         <PackageReference Include="Dapper" Version="2.1.66" />
         <PackageReference Include="dbup" Version="5.0.41" />
         <PackageReference Include="DotNetEnv" Version="3.1.1" />
+        <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
@@ -24,6 +25,10 @@
         <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.3" />
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.3" />
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Shared\Shared.csproj" />
     </ItemGroup>
 
 </Project>

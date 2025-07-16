@@ -3,13 +3,11 @@ using System.Security.Claims;
 using System.Text;
 using DotNetEnv;
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using NotificationService.Application.Handler;
+using MyCompany.Shared.Http;
 using NotificationService.Application.Models;
 using NotificationService.Application.Services.Abstractions;
 using NotificationService.Application.Validators;
@@ -53,7 +51,7 @@ internal class Program
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             options.IncludeXmlComments(xmlPath);
-            
+
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Description = "JWT Authorization header using the Bearer scheme.",
@@ -78,7 +76,7 @@ internal class Program
                 }
             });
         });
-        
+
         services.AddCors(options =>
         {
             options.AddPolicy("AllowApiGateway", policy =>
@@ -94,22 +92,27 @@ internal class Program
         services.AddSignalR();
         services.AddHttpContextAccessor();
         services.AddTransient<ForwardAccessTokenHandler>();
-        services.AddScoped<INotificationService, NotificationService.Application.Services.Implementations.NotificationService>();
+        services
+            .AddScoped<INotificationService,
+                NotificationService.Application.Services.Implementations.NotificationService>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
-        services.AddHttpClient<CreateNotificationDtoValidator>(client => client.BaseAddress = new Uri($"{Environment.GetEnvironmentVariable("AUTH_API")}/api/auth/"))
+        services.AddHttpClient<CreateNotificationDtoValidator>(client =>
+                client.BaseAddress = new Uri($"{Environment.GetEnvironmentVariable("AUTH_API")}/api/auth/"))
             .ConfigurePrimaryHttpMessageHandler(() =>
                 new HttpClientHandler
                 {
-                    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                    ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
                 })
             .AddHttpMessageHandler<ForwardAccessTokenHandler>();
-        
+
         services.AddHttpClient<MarkAsReadNotificationValidator>(client =>
                 client.BaseAddress = new Uri($"{Environment.GetEnvironmentVariable("AUTH_API")}/api/auth/"))
             .ConfigurePrimaryHttpMessageHandler(() =>
                 new HttpClientHandler
                 {
-                    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                    ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
                 })
             .AddHttpMessageHandler<ForwardAccessTokenHandler>();
 
@@ -119,7 +122,7 @@ internal class Program
         services.AddScoped<IValidator<NotificationDto>>(sp =>
             sp.GetRequiredService<MarkAsReadNotificationValidator>());
 
-        
+
         AddAuthentication(services, configuration);
     }
 
@@ -164,7 +167,7 @@ internal class Program
                 };
             });
     }
-    
+
     private static void ApplyMigrations(WebApplication app)
     {
         using var scope = app.Services.CreateScope();

@@ -4,7 +4,9 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MyCompany.Shared.Http;
 using TaskService.Application.Services.Abstractions;
+using TaskService.Application.Services.Helpers;
 using TaskService.Application.Services.Implementations;
 using TaskService.Repository.Abstractions;
 using TaskService.Repository.Data.AppDbContext;
@@ -33,12 +35,23 @@ internal class Program
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-
+        services.AddHttpContextAccessor();
+        services.AddTransient<ForwardAccessTokenHandler>();
         services.AddSingleton<IDbConnectionFactory>(new NpgsqlConnectionFactory(connectionString));
+        services.AddHttpClient<IJobService, JobService>(client =>
+                client.BaseAddress = new Uri($"{Environment.GetEnvironmentVariable("AUTH_API")}/api/auth/"))
+            .ConfigurePrimaryHttpMessageHandler(() =>
+                new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                })
+            .AddHttpMessageHandler<ForwardAccessTokenHandler>();
         services.AddScoped<IJobRepository, JobRepository>();
-        services.AddScoped<IJobService, JobService>();
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
-
+        services.AddScoped<IJobHistoryService, JobHistoryService>();
+        services.AddScoped<IJobHistoryRepository, JobHistoryRepository>();
+        services.AddScoped<IJobHelper, JobHelper>();
         services.AddControllers();
 
         services.AddEndpointsApiExplorer();

@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices.ComTypes;
 using FluentValidation;
 using NotificationService.Application.Models;
+using Shared.Services;
 
 namespace NotificationService.Application.Validators;
 
@@ -23,13 +24,12 @@ public class CreateNotificationDtoValidator : AbstractValidator<CreateNotificati
 
     private async Task<bool> IsUserLogin()
     {
-        var response = await httpClient.GetAsync("me");
-        return response.IsSuccessStatusCode;
+        var user = await UserHelper.GetCurrentUserId(httpClient);
+        return true;
     }
 
     private async Task<bool> IsReceiverExists(int userId)
     {
-        var response = await httpClient.GetAsync($"get-user-by/{userId}");
-        return response.IsSuccessStatusCode;
+        return await UserHelper.IsReceiverExists(httpClient, userId);
     }
 }

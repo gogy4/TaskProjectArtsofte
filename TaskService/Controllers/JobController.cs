@@ -12,12 +12,10 @@ public class JobController(IJobService service) : ControllerBase
     /// <summary>
     /// Получить список задач с фильтрацией и пагинацией.
     /// </summary>
-    /// <param name="request">Параметры фильтрации и пагинации.</param>
-    /// <returns>Список задач.</returns>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAll([FromBody] GetAllJobsRequest request)
+    public async Task<IActionResult> GetAll([FromQuery] GetAllJobsRequest request)
     {
         try
         {
@@ -33,8 +31,6 @@ public class JobController(IJobService service) : ControllerBase
     /// <summary>
     /// Получить задачу по ID.
     /// </summary>
-    /// <param name="id">ID задачи.</param>
-    /// <returns>Задача.</returns>
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -50,75 +46,122 @@ public class JobController(IJobService service) : ControllerBase
             return BadRequest(ex.Message);
         }
     }
-    
+
     /// <summary>
     /// Создать новую задачу.
     /// </summary>
-    /// <param name="job">Данные новой задачи.</param>
-    /// <returns>Созданная задача.</returns>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] JobDto job)
     {
-        var result = await service.CreateAsync(job);
-        return CreatedAtAction(nameof(Get), new { id = job.Id }, result);
+        try
+        {
+            var result = await service.CreateAsync(job);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
     /// Обновить задачу по ID.
     /// </summary>
-    /// <param name="id">ID задачи.</param>
-    /// <param name="job">Обновленные данные задачи.</param>
-    /// <returns>Обновленная задача.</returns>
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Update(int id, [FromBody] JobDto job)
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateJobRequest job)
     {
-        if (job.Id != id) return BadRequest();
-        var result = await service.UpdateAsync(job);
-        return Ok(result);
+        try
+        {
+            var result = await service.UpdateAsync(id, job);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
     /// Жесткое удаление задачи по ID.
     /// </summary>
-    /// <param name="id">ID задачи.</param>
-    /// <returns>Статус операции.</returns>
     [HttpDelete("{id}/hard-delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> HardDelete(int id)
     {
-        var result = await service.DeleteAsync(id);
-        return result == 0 ? NotFound() : Ok();
+        try
+        {
+            var result = await service.DeleteAsync(id);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
-    /// Мягкое удаление задачи по ID (пометка IsDeleted).
+    /// Мягкое удаление задачи по ID (IsDeleted).
     /// </summary>
-    /// <param name="id">ID задачи.</param>
-    /// <returns>Статус операции.</returns>
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SoftDelete(int id)
     {
-        var result = await service.SoftDeleteAsync(id);
-        return result == 0 ? NotFound() : Ok();
+        try
+        {
+            var result = await service.SoftDeleteAsync(id);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
     /// Назначить исполнителя задачи.
     /// </summary>
-    /// <param name="id">ID задачи.</param>
-    /// <param name="userId">ID пользователя-исполнителя.</param>
-    /// <returns>Статус операции.</returns>
     [HttpPut("{id}/assign")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AssignUser(int id, [FromBody] int userId)
     {
-        await service.AssignUserAsync(id, userId);
-        return Ok();
+        try
+        {
+            var result = await service.AssignUserAsync(id, userId);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Получить всю историю изменений для job по jobId
+    /// </summary>
+    /// <param name="jobId"></param>
+    /// <returns></returns>
+    [HttpGet("get-history-by-job/{jobId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetHistoryByJobId(int jobId)
+    {
+        try
+        {
+            var history = await service.GetHistoryByJobIdAsync(jobId);
+            return Ok(history);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
