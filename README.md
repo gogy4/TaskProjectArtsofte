@@ -2,9 +2,9 @@
 
 Веб-сервис для работы с задачами.
 
-## Быстрый старт
+## Поднять бд
 
-Для запуска используйте Docker Compose:
+Чтобы поднять бд используйте Docker Compose:
 
 ```
 docker-compose -f docker/docker-compose.yml up -d --build
