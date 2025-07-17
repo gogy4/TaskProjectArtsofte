@@ -22,6 +22,20 @@ dotnet ef migrations add <MigrationName> --project Infrastructure --startup-proj
 
 Миграции применяются автоматически при запуске приложения.
 
+## ENV
+
+В каждый микросервис в слой апи нужно подгрузить .env
+В том числе в API GATEWAY
+
+```
+JWT_KEY=AAAAB3NzaC1yc2EAAAABJQAAACEA3N1qw1YmAimBUVDFVgHdDulVCiQuBtCaDYQEf5FGMhM
+
+GATEWAY=https://localhost:7024
+AUTH_API=https://localhost:7026
+NOTIFICATION_API=https://localhost:7043
+TASK_API=https://localhost:7055
+```
+
 ## Технологии
 
 Работа с базой данных осуществляется через **Dapper**.  
